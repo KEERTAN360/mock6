@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 export const runtime = "nodejs"
 
 // Enhanced MongoDB connection with external access support
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/mock5"
+const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined")
@@ -34,10 +34,10 @@ export async function connectToDatabase() {
   if (cached.conn) return cached.conn as typeof mongoose
   
   if (!cached.promise) {
-    console.log('🔌 Connecting to MongoDB...')
-    console.log(`📍 Connection URI: ${MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`) // Hide credentials in logs
+  console.log('🔌 Connecting to MongoDB...')
+  console.log(`📍 Connection URI: ${MONGODB_URI!.replace(/\/\/.*@/, '//***:***@')}`) // Hide credentials in logs
     
-    cached.promise = mongoose.connect(MONGODB_URI, connectionOptions as any)
+  cached.promise = mongoose.connect(MONGODB_URI!, connectionOptions as any)
       .then((conn) => {
         console.log('✅ MongoDB connected successfully')
         return conn
