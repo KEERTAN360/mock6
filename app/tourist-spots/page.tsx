@@ -303,7 +303,6 @@ const GoogleMap = ({
         </div>
       )}
     </div>
-  )
 }
 
 export default function TouristSpotsPage() {
@@ -1157,11 +1156,7 @@ export default function TouristSpotsPage() {
           </>
         )}
       </div>
-
       <BottomNavigation />
     </div>
   );
 }
-
-
-
