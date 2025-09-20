@@ -1,5 +1,4 @@
-  // Defensive error state
-  const [error, setError] = useState<string | null>(null);
+
 "use client"
 
 import {
@@ -50,6 +49,7 @@ const GoogleMap = ({
   const [heatmapLayer, setHeatmapLayer] = useState<any>(null)
   const [markers, setMarkers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null)
 
   const getHeatmapColor = (place: any) => {
@@ -268,10 +268,11 @@ const GoogleMap = ({
     run()
   }, [searchQuery, map, userLocation, loadPlaces])
 
+  // Defensive render with error boundary
+  if (error) {
+    return <div className="w-full h-full flex items-center justify-center text-red-600 bg-red-50 rounded-2xl">Map error: {error}</div>;
+  }
   try {
-    if (error) {
-      return <div className="w-full h-full flex items-center justify-center text-red-600 bg-red-50 rounded-2xl">Map error: {error}</div>;
-    }
     return (
       <div className="w-full h-full relative">
         <div ref={mapRef} className="w-full h-full rounded-2xl"></div>
