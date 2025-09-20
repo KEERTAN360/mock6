@@ -125,11 +125,7 @@ const GoogleMap = ({
 
       const allPlaces = placesResp.map(normalize)
 
-      // Clear existing markers
-      markers.forEach(marker => marker.setMap(null))
-      const newMarkers: any[] = []
-
-      // Create heatmap data
+      // Only create heatmap data, no markers
       const heatmapPoints = allPlaces.map(place => {
         const heatmapColor = getHeatmapColor(place)
         return {
@@ -137,52 +133,7 @@ const GoogleMap = ({
           weight: heatmapColor.weight
         }
       })
-
-  setHeatmapData(heatmapPoints)
-
-      // Create colored markers
-      allPlaces.forEach((place: any) => {
-        const heatmapColor = getHeatmapColor(place)
-        const marker = new (window as any).google.maps.Marker({
-          position: place.geometry.location,
-          map: map,
-          title: place.name,
-          icon: {
-            url: `data:image/svg+xml;base64,${btoa(`
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="8" fill="${heatmapColor.color}" stroke="#ffffff" strokeWidth="2"/>
-                <circle cx="12" cy="12" r="3" fill="#ffffff"/>
-              </svg>
-            `)}`,
-            scaledSize: new (window as any).google.maps.Size(24, 24),
-          },
-        })
-
-        const infoWindow = new (window as any).google.maps.InfoWindow({
-          content: `
-            <div style="padding: 8px; max-width: 200px;">
-              <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: bold;">${place.name}</h3>
-              <p style="margin: 0; font-size: 12px; color: #666;">${place.vicinity}</p>
-              <div style="display: flex; align-items: center; margin-top: 4px;">
-                <span style="color: #f59e0b;">★</span>
-                <span style="margin-left: 4px; font-size: 12px;">${place.rating || "N/A"}</span>
-                <span style="margin-left: 8px; font-size: 11px; color: #666;">(${place.user_ratings_total || 0} reviews)</span>
-              </div>
-              <div style="margin-top: 4px;">
-                <span style="font-size: 11px; color: #666;">Type: ${place.types?.[0]?.replace(/_/g, ' ') || 'Unknown'}</span>
-              </div>
-            </div>
-          `,
-        })
-
-        marker.addListener("click", () => {
-          infoWindow.open(map, marker)
-        })
-
-        newMarkers.push(marker)
-      })
-
-      setMarkers(newMarkers)
+      setHeatmapData(heatmapPoints)
       onPlacesUpdate(allPlaces)
     } catch (error) {
       console.error('Error loading places:', error)
@@ -238,18 +189,27 @@ const GoogleMap = ({
     }
   // Add or update heatmap layer when heatmapData or map changes
   useEffect(() => {
-    if (map && (window as any).google && (window as any).google.maps && (window as any).google.maps.visualization) {
-      if (heatmapLayer) {
-        heatmapLayer.setMap(null);
+    try {
+      if (map && (window as any).google && (window as any).google.maps && (window as any).google.maps.visualization) {
+        if (heatmapLayer) {
+          heatmapLayer.setMap(null);
+        }
+        if (heatmapData.length > 0) {
+          // Format data as array of {location: LatLng, weight: number}
+          const dataArr = heatmapData.map((point: any) => ({ location: point.location, weight: point.weight }));
+          const layer = new (window as any).google.maps.visualization.HeatmapLayer({
+            data: dataArr,
+            map: map,
+            radius: 40,
+            opacity: 0.6,
+          });
+          setHeatmapLayer(layer);
+        }
       }
-      if (heatmapData.length > 0) {
-        const layer = new (window as any).google.maps.visualization.HeatmapLayer({
-          data: heatmapData.map((point: any) => ({ location: point.location, weight: point.weight })),
-          map: map,
-          radius: 40,
-          opacity: 0.6,
-        });
-        setHeatmapLayer(layer);
+    } catch (err) {
+      // Log error to browser console for debugging
+      if (typeof window !== 'undefined' && window.console) {
+        console.error('HeatmapLayer error:', err);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
