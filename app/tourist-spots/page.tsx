@@ -1,3 +1,5 @@
+  // Defensive error state
+  const [error, setError] = useState<string | null>(null);
 "use client"
 
 import {
@@ -266,23 +268,31 @@ const GoogleMap = ({
     run()
   }, [searchQuery, map, userLocation, loadPlaces])
 
-  return (
-    <div className="w-full h-full relative">
-      <div ref={mapRef} className="w-full h-full rounded-2xl"></div>
-      {/* Locate me control (non-intrusive overlay, parent handles actual permission) */}
-      <div className="absolute bottom-3 left-3">
-        <div className="bg-background/95 backdrop-blur-sm rounded-lg shadow-md border border-border px-2 py-1 text-xs flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span>Location-ready</span>
+  try {
+    if (error) {
+      return <div className="w-full h-full flex items-center justify-center text-red-600 bg-red-50 rounded-2xl">Map error: {error}</div>;
+    }
+    return (
+      <div className="w-full h-full relative">
+        <div ref={mapRef} className="w-full h-full rounded-2xl"></div>
+        {/* Locate me control (non-intrusive overlay, parent handles actual permission) */}
+        <div className="absolute bottom-3 left-3">
+          <div className="bg-background/95 backdrop-blur-sm rounded-lg shadow-md border border-border px-2 py-1 text-xs flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>Location-ready</span>
+          </div>
         </div>
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
+            <Loader2 className="h-6 w-6 animate-spin text-white" />
+          </div>
+        )}
       </div>
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
-          <Loader2 className="h-6 w-6 animate-spin text-white" />
-        </div>
-      )}
-    </div>
-  )
+    );
+  } catch (err: any) {
+    setError(err?.message || 'Unknown error');
+    return <div className="w-full h-full flex items-center justify-center text-red-600 bg-red-50 rounded-2xl">Map crashed: {err?.message || 'Unknown error'}</div>;
+  }
 }
 
 export default function TouristSpotsPage() {
