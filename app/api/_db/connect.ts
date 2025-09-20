@@ -18,7 +18,8 @@ if (!cached) {
 export async function connectToDatabase() {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-  cached.promise = mongoose.connect(mongoURI!, {
+    cached.promise = mongoose.connect(mongoURI!, {
+      dbName: "tourist_app",
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as any);
