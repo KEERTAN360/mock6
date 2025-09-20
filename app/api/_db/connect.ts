@@ -1,9 +1,10 @@
 
+
 import mongoose from "mongoose";
 
 const mongoURI = process.env.MONGODB_URI;
 
-mongoose.connect(mongoURI!, {
+mongoose.connect(mongoURI ?? "", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 } as any)
