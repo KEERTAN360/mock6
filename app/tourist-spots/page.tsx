@@ -324,7 +324,6 @@ export default function TouristSpotsPage() {
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isLocationLoading, setIsLocationLoading] = useState(false)
-  const [locationWatchId, setLocationWatchId] = useState<number | null>(null)
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null)
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null)
   const [locationRetryCount, setLocationRetryCount] = useState(0)
@@ -347,88 +346,50 @@ export default function TouristSpotsPage() {
     }
   }, [])
 
-  // Enhanced location handling using LocationService
+  // One-time location capture using LocationService
   useEffect(() => {
-    // Check permissions first
-    checkLocationPermission()
-    
-    const initializeLocation = async () => {
-      setIsLocationLoading(true)
-      setLocationRetryCount(0)
-      setLocationRetryAttempts([])
-
+    checkLocationPermission();
+    const getLocationOnce = async () => {
+      setIsLocationLoading(true);
+      setLocationRetryCount(0);
+      setLocationRetryAttempts([]);
       try {
         const coords = await LocationService.getCurrentLocation({
           onProgress: (attempt, strategy) => {
-            setLocationRetryCount(attempt)
-            setLocationRetryAttempts(prev => [...prev, strategy.description])
+            setLocationRetryCount(attempt);
+            setLocationRetryAttempts(prev => [...prev, strategy.description]);
           },
           onSuccess: (coords) => {
-            setLocationError("")
-            setUserLocation(coords)
-            setLocationAccuracy(coords.accuracy || null)
-            setLastLocationUpdate(coords.timestamp || new Date())
-            setIsLocationLoading(false)
-            setLocationRetryCount(0)
-            setLocationRetryAttempts([])
-            
-            // Start live location tracking
-            startLiveLocationTracking()
+            setLocationError("");
+            setUserLocation(coords);
+            setLocationAccuracy(coords.accuracy || null);
+            setLastLocationUpdate(coords.timestamp || new Date());
+            setIsLocationLoading(false);
+            setLocationRetryCount(0);
+            setLocationRetryAttempts([]);
           },
           onError: (error, finalAttempt) => {
             if (finalAttempt) {
-              setLocationError(LocationService.getErrorMessage(error))
+              setLocationError(LocationService.getErrorMessage(error));
             }
-            setIsLocationLoading(false)
+            setIsLocationLoading(false);
           }
-        })
-
+        });
         if (coords) {
-          setUserLocation(coords)
-          setLocationAccuracy(coords.accuracy || null)
-          setLastLocationUpdate(coords.timestamp || new Date())
-          startLiveLocationTracking()
+          setUserLocation(coords);
+          setLocationAccuracy(coords.accuracy || null);
+          setLastLocationUpdate(coords.timestamp || new Date());
         }
       } catch (error) {
-        console.error('Location initialization error:', error)
-        setLocationError('Failed to initialize location service.')
-        setIsLocationLoading(false)
+        console.error('Location initialization error:', error);
+        setLocationError('Failed to initialize location service.');
+        setIsLocationLoading(false);
       }
-    }
+    };
+    getLocationOnce();
+  }, []);
 
-    initializeLocation()
-  }, [])
 
-  // Start live location tracking using LocationService
-  const startLiveLocationTracking = useCallback(() => {
-    if (locationWatchId) {
-      navigator.geolocation.clearWatch(locationWatchId)
-    }
-
-    const watchId = LocationService.watchLocation(
-      (coords) => {
-        setUserLocation(coords)
-        setLocationAccuracy(coords.accuracy || null)
-        setLastLocationUpdate(coords.timestamp || new Date())
-        setLocationError("")
-      },
-      (error) => {
-        console.error('Live location tracking error:', error)
-        setLocationError('Live location tracking failed')
-      }
-    )
-
-    setLocationWatchId(watchId)
-  }, [locationWatchId])
-
-  // Cleanup location tracking on unmount
-  useEffect(() => {
-    return () => {
-      if (locationWatchId) {
-        navigator.geolocation.clearWatch(locationWatchId)
-      }
-    }
-  }, [locationWatchId])
 
   const requestLocation = useCallback(async () => {
     setIsLocationLoading(true)
@@ -451,7 +412,7 @@ export default function TouristSpotsPage() {
         setLocationRetryAttempts([])
         
         // Start live location tracking
-        startLiveLocationTracking()
+
       },
       onError: (error, finalAttempt) => {
         if (finalAttempt) {
@@ -465,14 +426,14 @@ export default function TouristSpotsPage() {
       setUserLocation(coords)
       setLocationAccuracy(coords.accuracy || null)
       setLastLocationUpdate(coords.timestamp || new Date())
-      startLiveLocationTracking()
+
     }
   } catch (error) {
     console.error('Manual location request error:', error)
     setLocationError('Failed to get location. Please try again.')
     setIsLocationLoading(false)
   }
-  }, [startLiveLocationTracking])
+
 
   // Share live location
   const shareLiveLocation = useCallback(async () => {
