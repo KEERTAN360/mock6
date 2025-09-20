@@ -45,6 +45,7 @@ const GoogleMap = ({
 }) => {
   const [map, setMap] = useState<any>(null)
   const [heatmapData, setHeatmapData] = useState<any[]>([])
+  const [heatmapLayer, setHeatmapLayer] = useState<any>(null)
   const [markers, setMarkers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
@@ -137,7 +138,7 @@ const GoogleMap = ({
         }
       })
 
-      setHeatmapData(heatmapPoints)
+  setHeatmapData(heatmapPoints)
 
       // Create colored markers
       allPlaces.forEach((place: any) => {
@@ -227,7 +228,7 @@ const GoogleMap = ({
     // Load Google Maps API
     if (!(window as any).google) {
       const script = document.createElement("script")
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA0Zd7rDC2d0JlmkDdd3V_6Hp53PfkbeV4&libraries=places,geometry&callback=initMap`
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA0Zd7rDC2d0JlmkDdd3V_6Hp53PfkbeV4&libraries=places,geometry,visualization&callback=initMap`
       script.async = true
       script.defer = true
       ;(window as any).initMap = initMap
@@ -235,6 +236,24 @@ const GoogleMap = ({
     } else {
       initMap()
     }
+  // Add or update heatmap layer when heatmapData or map changes
+  useEffect(() => {
+    if (map && (window as any).google && (window as any).google.maps && (window as any).google.maps.visualization) {
+      if (heatmapLayer) {
+        heatmapLayer.setMap(null);
+      }
+      if (heatmapData.length > 0) {
+        const layer = new (window as any).google.maps.visualization.HeatmapLayer({
+          data: heatmapData.map((point: any) => ({ location: point.location, weight: point.weight })),
+          map: map,
+          radius: 40,
+          opacity: 0.6,
+        });
+        setHeatmapLayer(layer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heatmapData, map]);
   }, [userLocation, loadPlaces])
 
   // Recenter when a fresh user location arrives
