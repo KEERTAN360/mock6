@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install dependencies
-npm install
+npm ci --only=production
 
 # Build the application
 npm run build

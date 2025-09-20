@@ -538,12 +538,14 @@ export default function TouristSpotsPage() {
 
   useEffect(() => {
     const loadPrefs = async () => {
-      const username = localStorage.getItem("username") || "guest"
-      try {
-        const res = await fetch(`/api/preferences?username=${encodeURIComponent(username)}`, { cache: "no-store" })
-        const data = await res.json()
-        setPreferences(data?.preferences || null)
-      } catch {}
+      if (typeof window !== 'undefined') {
+        const username = localStorage.getItem("username") || "guest"
+        try {
+          const res = await fetch(`/api/preferences?username=${encodeURIComponent(username)}`, { cache: "no-store" })
+          const data = await res.json()
+          setPreferences(data?.preferences || null)
+        } catch {}
+      }
     }
     loadPrefs()
   }, [])

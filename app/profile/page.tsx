@@ -19,17 +19,20 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username")
-    if (!storedUsername) {
-      router.push("/login")
-      return
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const storedUsername = localStorage.getItem("username")
+      if (!storedUsername) {
+        router.push("/login")
+        return
+      }
+      setUsername(storedUsername)
+      const email = localStorage.getItem("email") || ""
+      const phone = localStorage.getItem("phone") || ""
+      const location = localStorage.getItem("userAddress") || ""
+      const joinDate = localStorage.getItem("joinDate") || ""
+      setProfileData({ name: storedUsername, email, phone, location, joinDate })
     }
-    setUsername(storedUsername)
-    const email = localStorage.getItem("email") || ""
-    const phone = localStorage.getItem("phone") || ""
-    const location = localStorage.getItem("userAddress") || ""
-    const joinDate = localStorage.getItem("joinDate") || ""
-    setProfileData({ name: storedUsername, email, phone, location, joinDate })
   }, [router])
 
   const travelHistory = [
@@ -139,7 +142,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-3">
               <Phone className="h-5 w-5 text-red-600" />
               <span className="text-sm text-gray-700">
-                {localStorage.getItem("userEmergencyContact") || "Add emergency contact in About page"}
+                {typeof window !== 'undefined' ? (localStorage.getItem("userEmergencyContact") || "Add emergency contact in About page") : "Add emergency contact in About page"}
               </span>
             </div>
           </div>
