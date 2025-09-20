@@ -1,119 +1,3 @@
-// --- Add missing constants and components ---
-const categories = [
-  { label: 'Attractions', color: 'from-blue-500 to-blue-700', icon: Compass, href: '/explore' },
-  { label: 'Hotels', color: 'from-green-500 to-green-700', icon: Hotel, href: '/hotel' },
-  { label: 'Restaurants', color: 'from-yellow-500 to-yellow-700', icon: UtensilsCrossed, href: '/restaurant' },
-  { label: 'Cafes', color: 'from-pink-500 to-pink-700', icon: Coffee, href: '/cafe' },
-  { label: 'Events', color: 'from-purple-500 to-purple-700', icon: Calendar, href: '/events' },
-  { label: 'Activities', color: 'from-orange-500 to-orange-700', icon: Activity, href: '/activities' },
-];
-
-const safetyHazards = [
-  { name: 'Landslide Zone', severity: 'high', condition: 'Landslide', reason: 'Recent heavy rains', image: '/dynamic-safety-hazard-landslide.jpg' },
-  { name: 'Flooded Area', severity: 'high', condition: 'Flood', reason: 'River overflow', image: '/dynamic-safety-hazard-rain.jpg' },
-  { name: 'Theft Prone', severity: 'medium', condition: 'Theft', reason: 'Reported incidents', image: '/dynamic-safety-hazard-theft.jpg' },
-  { name: 'Dark Zone', severity: 'medium', condition: 'Low Lighting', reason: 'Poor street lights', image: '/dynamic-safety-hazard-dark.jpg' },
-];
-
-const SpotCard = ({ spot }: { spot: any }) => {
-  const router = useRouter();
-  const photo = spot.photos?.[0]?.getUrl({ maxWidth: 400 }) || '/dynamic-featured-bandipur.jpg';
-  const safety = { color: 'text-green-500', score: 'Safe', level: 'Low' };
-  return (
-    <Card className="placard-3d flex-shrink-0 w-52 rounded-3xl overflow-hidden shadow-md cursor-pointer bg-card border border-border" onClick={() => router.push(`/hotel/${encodeURIComponent(spot.name)}`)}>
-      <div className="relative">
-        <img src={photo} alt={spot.name} className="w-full h-32 object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute top-2 right-2">
-          <LikeButton
-            placeId={spot.place_id || spot.name.toLowerCase().replace(/\s+/g, "-")}
-            placeName={spot.name}
-            placeData={{
-              name: spot.name,
-              location: spot.vicinity || "Karnataka, India",
-              image: photo,
-              rating: spot.rating?.toString() || "N/A",
-              timing: spot.opening_hours?.open_now ? "Open Now" : "Check Hours",
-              entry: spot.price_level ? `₹${spot.price_level * 200}` : "Free",
-              description: spot.types?.[0]?.replace(/_/g, ' ') || "Tourist Attraction",
-            }}
-            size="sm"
-            className="shadow-lg"
-          />
-        </div>
-        <div className="absolute top-2 left-2">
-          <div className="bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-md">
-            <div className={
-              "w-2 h-2 rounded-full " +
-              (safety.color === "text-green-500" ? "bg-green-500" :
-                safety.color === "text-yellow-500" ? "bg-yellow-500" :
-                safety.color === "text-orange-500" ? "bg-orange-500" : "bg-gray-500")
-            }></div>
-            <span className="text-xs font-medium text-gray-800">{safety.score}</span>
-          </div>
-        </div>
-        <div className="absolute bottom-2 left-2 right-2 text-white">
-          <div className="space-y-1">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <p className="text-xs opacity-90">
-                  {spot.opening_hours?.open_now ? "Open Now" : "Check Hours"}
-                </p>
-                <p className="text-xs opacity-90">
-                  {spot.price_level ? `₹${spot.price_level * 200}` : "Free"}
-                </p>
-                <p className={`text-xs font-medium ${safety.color}`}>
-                  Safety: {safety.level}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                <span className="text-xs">{spot.rating?.toFixed(1) || "N/A"}</span>
-              </div>
-            </div>
-            <p className="text-xs opacity-75 italic">
-              {spot.types?.[0]?.replace(/_/g, ' ') || "Tourist Attraction"}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="text-sm font-semibold text-card-foreground text-center truncate">{spot.name}</h3>
-        <p className="text-xs text-muted-foreground text-center mt-1 truncate">{spot.vicinity}</p>
-      </div>
-    </Card>
-  );
-};
-
-const SafetyHazardCard = ({ hazard }: { hazard: any }) => (
-  <Card className="placard-3d flex-shrink-0 w-48 rounded-3xl overflow-hidden shadow-md bg-card border border-destructive/20">
-    <div className="relative">
-      <img src={hazard.image || "/placeholder.svg"} alt={hazard.name} className="w-full h-28 object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-red-900/80 via-red-900/20 to-transparent" />
-      <div className="absolute top-2 right-2">
-        <div
-          className={"px-2 py-1 rounded-full text-xs font-medium " + (hazard.severity === "high" ? "bg-red-500 text-white" : "bg-amber-500 text-white")}
-        >
-          {hazard.condition}
-        </div>
-      </div>
-      <div className="absolute bottom-2 left-2 right-2 text-white">
-        <div className="flex items-center gap-1 mb-1">
-          <AlertCircle className={"h-3 w-3 " + (hazard.severity === "high" ? "text-red-400" : "text-amber-400") } />
-          <span className="text-xs font-medium">{hazard.severity.toUpperCase()} RISK</span>
-        </div>
-      </div>
-    </div>
-    <div className="p-3">
-      <h3 className="text-sm font-medium text-card-foreground mb-1">{hazard.name}</h3>
-      <p className="text-xs text-muted-foreground">{hazard.reason}</p>
-    </div>
-  </Card>
-);
-
-function handlePlacesUpdate(places: any[]) {}
-function requestLocation() {}
-function shareLiveLocation() {}
 "use client"
 
 import {
@@ -282,11 +166,13 @@ const GoogleMap = ({
                 <span style="color: #f59e0b;">★</span>
                 <span style="margin-left: 4px; font-size: 12px;">${place.rating || "N/A"}</span>
                 <span style="margin-left: 8px; font-size: 11px; color: #666;">(${place.user_ratings_total || 0} reviews)</span>
-              <div
-                className={"px-2 py-1 rounded-full text-xs font-medium " + (hazard.severity === "high" ? "bg-red-500 text-white" : "bg-amber-500 text-white")}
-              >
-                {hazard.condition}
               </div>
+              <div style="margin-top: 4px;">
+                <span style="font-size: 11px; color: #666;">Type: ${place.types?.[0]?.replace(/_/g, ' ') || 'Unknown'}</span>
+              </div>
+            </div>
+          `,
+        })
 
         marker.addListener("click", () => {
           infoWindow.open(map, marker)
@@ -340,16 +226,16 @@ const GoogleMap = ({
 
     // Load Google Maps API
     if (!(window as any).google) {
-      const script = document.createElement("script");
-      script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyA0Zd7rDC2d0JlmkDdd3V_6Hp53PfkbeV4&libraries=places,geometry&callback=initMap";
-      script.async = true;
-      script.defer = true;
-      (window as any).initMap = initMap;
-      document.head.appendChild(script);
+      const script = document.createElement("script")
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA0Zd7rDC2d0JlmkDdd3V_6Hp53PfkbeV4&libraries=places,geometry&callback=initMap`
+      script.async = true
+      script.defer = true
+      ;(window as any).initMap = initMap
+      document.head.appendChild(script)
     } else {
-      initMap();
+      initMap()
     }
-  }, [userLocation, loadPlaces]);
+  }, [userLocation, loadPlaces])
 
   // Recenter when a fresh user location arrives
   useEffect(() => {
@@ -417,7 +303,8 @@ const GoogleMap = ({
         </div>
       )}
     </div>
-  );
+  )
+}
 
 export default function TouristSpotsPage() {
   const router = useRouter()
@@ -437,6 +324,7 @@ export default function TouristSpotsPage() {
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isLocationLoading, setIsLocationLoading] = useState(false)
+  const [locationWatchId, setLocationWatchId] = useState<number | null>(null)
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null)
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null)
   const [locationRetryCount, setLocationRetryCount] = useState(0)
@@ -446,38 +334,459 @@ export default function TouristSpotsPage() {
   // Check location permission status
   const checkLocationPermission = useCallback(async () => {
     if ('permissions' in navigator) {
-      return (
-        <div className="min-h-screen bg-background flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 pt-6">
-            <h1 className="text-xl font-semibold text-foreground">Tourist Spots</h1>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 shadow-lg h-10 w-10" onClick={() => router.push("/geofencing-alerts")}> <AlertTriangle className="h-5 w-5" /> </Button>
-              <Button variant="ghost" size="icon" className="text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 shadow-lg h-10 w-10" onClick={() => router.push("/saved-places")}> <Bookmark className="h-5 w-5" /> </Button>
-              <Button variant="ghost" size="icon" className="text-primary-foreground bg-blue-500 rounded-xl hover:bg-blue-600 shadow-lg h-10 w-10" onClick={() => router.push("/sos")}> <Shield className="h-5 w-5" /> </Button>
-              <Button variant="ghost" size="icon" className="text-foreground bg-card rounded-xl hover:bg-muted border border-border h-10 w-10"> <Menu className="h-5 w-5" /> </Button>
+      try {
+        const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        setLocationPermissionStatus(permission.state)
+        
+        permission.onchange = () => {
+          setLocationPermissionStatus(permission.state)
+        }
+      } catch (error) {
+        console.log('Permission API not supported')
+      }
+    }
+  }, [])
+
+  // Enhanced location handling using LocationService
+  useEffect(() => {
+    // Check permissions first
+    checkLocationPermission()
+    
+    const initializeLocation = async () => {
+      setIsLocationLoading(true)
+      setLocationRetryCount(0)
+      setLocationRetryAttempts([])
+
+      try {
+        const coords = await LocationService.getCurrentLocation({
+          onProgress: (attempt, strategy) => {
+            setLocationRetryCount(attempt)
+            setLocationRetryAttempts(prev => [...prev, strategy.description])
+          },
+          onSuccess: (coords) => {
+            setLocationError("")
+            setUserLocation(coords)
+            setLocationAccuracy(coords.accuracy || null)
+            setLastLocationUpdate(coords.timestamp || new Date())
+            setIsLocationLoading(false)
+            setLocationRetryCount(0)
+            setLocationRetryAttempts([])
+            
+            // Start live location tracking
+            startLiveLocationTracking()
+          },
+          onError: (error, finalAttempt) => {
+            if (finalAttempt) {
+              setLocationError(LocationService.getErrorMessage(error))
+            }
+            setIsLocationLoading(false)
+          }
+        })
+
+        if (coords) {
+          setUserLocation(coords)
+          setLocationAccuracy(coords.accuracy || null)
+          setLastLocationUpdate(coords.timestamp || new Date())
+          startLiveLocationTracking()
+        }
+      } catch (error) {
+        console.error('Location initialization error:', error)
+        setLocationError('Failed to initialize location service.')
+        setIsLocationLoading(false)
+      }
+    }
+
+    initializeLocation()
+  }, [])
+
+  // Start live location tracking using LocationService
+  const startLiveLocationTracking = useCallback(() => {
+    if (locationWatchId) {
+      navigator.geolocation.clearWatch(locationWatchId)
+    }
+
+    const watchId = LocationService.watchLocation(
+      (coords) => {
+        setUserLocation(coords)
+        setLocationAccuracy(coords.accuracy || null)
+        setLastLocationUpdate(coords.timestamp || new Date())
+        setLocationError("")
+      },
+      (error) => {
+        console.error('Live location tracking error:', error)
+        setLocationError('Live location tracking failed')
+      }
+    )
+
+    setLocationWatchId(watchId)
+  }, [locationWatchId])
+
+  // Cleanup location tracking on unmount
+  useEffect(() => {
+    return () => {
+      if (locationWatchId) {
+        navigator.geolocation.clearWatch(locationWatchId)
+      }
+    }
+  }, [locationWatchId])
+
+  const requestLocation = useCallback(async () => {
+    setIsLocationLoading(true)
+    setLocationRetryCount(0)
+    setLocationRetryAttempts([])
+
+    try {
+      const coords = await LocationService.getCurrentLocation({
+      onProgress: (attempt, strategy) => {
+        setLocationRetryCount(attempt)
+        setLocationRetryAttempts(prev => [...prev, strategy.description])
+      },
+      onSuccess: (coords) => {
+        setLocationError("")
+        setUserLocation(coords)
+        setLocationAccuracy(coords.accuracy || null)
+        setLastLocationUpdate(coords.timestamp || new Date())
+        setIsLocationLoading(false)
+        setLocationRetryCount(0)
+        setLocationRetryAttempts([])
+        
+        // Start live location tracking
+        startLiveLocationTracking()
+      },
+      onError: (error, finalAttempt) => {
+        if (finalAttempt) {
+          setLocationError(LocationService.getErrorMessage(error))
+        }
+        setIsLocationLoading(false)
+      }
+    })
+
+    if (coords) {
+      setUserLocation(coords)
+      setLocationAccuracy(coords.accuracy || null)
+      setLastLocationUpdate(coords.timestamp || new Date())
+      startLiveLocationTracking()
+    }
+  } catch (error) {
+    console.error('Manual location request error:', error)
+    setLocationError('Failed to get location. Please try again.')
+    setIsLocationLoading(false)
+  }
+  }, [startLiveLocationTracking])
+
+  // Share live location
+  const shareLiveLocation = useCallback(async () => {
+    if (!userLocation) {
+      alert('Location not available. Please enable location access.')
+      return
+    }
+
+    const locationUrl = `https://www.google.com/maps?q=${userLocation.lat},${userLocation.lng}`
+    const locationText = `📍 My current location: ${locationUrl}\n\nLatitude: ${userLocation.lat.toFixed(6)}\nLongitude: ${userLocation.lng.toFixed(6)}\n\nShared from Karnataka Tourism App`
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Live Location',
+          text: locationText,
+          url: locationUrl
+        })
+      } else {
+        await navigator.clipboard.writeText(locationText)
+        alert('Location copied to clipboard!')
+      }
+    } catch (error) {
+      console.error('Error sharing location:', error)
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(locationText)
+        alert('Location copied to clipboard!')
+      } catch (clipboardError) {
+        alert('Unable to share location. Please try again.')
+      }
+    }
+  }, [userLocation])
+
+  // Get location address using reverse geocoding
+  const getLocationAddress = useCallback(async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
+      )
+      const data = await response.json()
+      
+      if (data.results && data.results.length > 0) {
+        return data.results[0].formatted_address
+      }
+    } catch (error) {
+      console.error('Reverse geocoding error:', error)
+    }
+    return null
+  }, [])
+
+  useEffect(() => {
+    const statsInterval = setInterval(() => {
+      setLiveStats((prev) => ({
+        visitors: prev.visitors + Math.floor(Math.random() * 10) - 5,
+        trending: prev.trending + Math.floor(Math.random() * 3) - 1,
+        activeNow: prev.activeNow + Math.floor(Math.random() * 20) - 10,
+      }))
+    }, 3000)
+
+    return () => clearInterval(statsInterval)
+  }, [])
+
+  useEffect(() => {
+    const loadPrefs = async () => {
+      if (typeof window !== 'undefined') {
+        const username = localStorage.getItem("username") || "guest"
+        try {
+          const res = await fetch(`/api/preferences?username=${encodeURIComponent(username)}`, { cache: "no-store" })
+          const data = await res.json()
+          setPreferences(data?.preferences || null)
+        } catch {}
+      }
+    }
+    loadPrefs()
+  }, [])
+
+  // Handle search with debouncing
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredPlaces(places)
+      setShowSuggestions(false)
+      return
+    }
+
+    const timeoutId = setTimeout(() => {
+      const filtered = places.filter(place =>
+        place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        place.vicinity.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        place.types?.some((type: string) => type.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      setFilteredPlaces(filtered)
+      setShowSuggestions(false)
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, places])
+
+  // Load nearest places with Places API v1
+  useEffect(() => {
+    const run = async () => {
+      if (!userLocation) return
+      try {
+        const body = {
+          includedTypes: ['tourist_attraction'],
+          maxResultCount: 10,
+          locationRestriction: {
+            circle: {
+              center: { latitude: userLocation.lat, longitude: userLocation.lng },
+              radius: 5000
+            }
+          }
+        }
+        const fieldMask = [
+          'places.id','places.displayName','places.formattedAddress','places.location','places.types',
+          'places.rating','places.userRatingCount','places.currentOpeningHours.openNow','places.photos'
+        ].join(',')
+        const resp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': GOOGLE_API_KEY,
+            'X-Goog-FieldMask': fieldMask,
+          },
+          body: JSON.stringify(body)
+        })
+        const json = await resp.json()
+        const placesResp = (json.places || []) as any[]
+        const normalize = (p: any) => ({
+          place_id: p.id,
+          name: p.displayName?.text || '',
+          vicinity: p.formattedAddress || '',
+          rating: p.rating || 0,
+          user_ratings_total: p.userRatingCount || 0,
+          types: p.types || [],
+          opening_hours: { open_now: p.currentOpeningHours?.openNow ?? undefined },
+          geometry: { location: { lat: p.location?.latitude, lng: p.location?.longitude } },
+          photos: (p.photos || []).map((ph: any) => ({
+            name: ph.name,
+            getUrl: ({ maxWidth, maxHeight }: any) => `https://places.googleapis.com/v1/${ph.name}/media?key=${GOOGLE_API_KEY}${maxWidth ? `&maxWidthPx=${maxWidth}` : ''}${maxHeight ? `&maxHeightPx=${maxHeight}` : ''}`
+          }))
+        })
+        setNearestPlaces(placesResp.map(normalize).slice(0, 3))
+      } catch (e) {
+        console.error('nearest load error', e)
+      }
+    }
+    run()
+  }, [userLocation])
+
+  const handlePlacesUpdate = (newPlaces: any[]) => {
+    setPlaces(newPlaces)
+    setFilteredPlaces(newPlaces)
+  }
+
+  const getPlacePhoto = (place: any) => {
+    if (place.photos && place.photos.length > 0) {
+      return place.photos[0].getUrl({ maxWidth: 400, maxHeight: 300 })
+    }
+    return "/placeholder.svg"
+  }
+
+  const getSafetyScore = (place: any) => {
+    const rating = place.rating || 0
+    const userRatingsTotal = place.user_ratings_total || 0
+    
+    if (rating >= 4.5 && userRatingsTotal >= 1000) return { score: 9.2, level: "Very Safe", color: "text-green-500" }
+    if (rating >= 4.0 && userRatingsTotal >= 500) return { score: 8.5, level: "Safe", color: "text-green-500" }
+    if (rating >= 3.5 && userRatingsTotal >= 100) return { score: 7.5, level: "Moderate", color: "text-yellow-500" }
+    if (rating >= 3.0) return { score: 6.5, level: "Caution", color: "text-orange-500" }
+    return { score: 5.0, level: "Unknown", color: "text-gray-500" }
+  }
+
+  const categories = [
+    { icon: Hotel, label: "Stays", color: "from-blue-400 to-blue-600", href: "/stays" },
+    { icon: UtensilsCrossed, label: "Restaurants", color: "from-green-400 to-green-600" },
+    { icon: Coffee, label: "Cafes", color: "from-amber-400 to-amber-600" },
+    { icon: Calendar, label: "Events", color: "from-pink-400 to-pink-600" },
+    { icon: Activity, label: "Activities", color: "from-orange-400 to-orange-600" },
+    { icon: Compass, label: "Explore", color: "from-indigo-400 to-indigo-600", href: "/explore" },
+  ]
+
+  const safetyHazards = [
+    {
+      name: "Jog Falls Trek Path",
+      image: "/dynamic-safety-hazard-rain.jpg",
+      reason: "Slippery rocks during monsoon",
+      severity: "high",
+      condition: "Heavy Rain",
+    },
+    {
+      name: "Coorg Night Safari",
+      image: "/dynamic-safety-hazard-dark.jpg",
+      reason: "Wild animal encounters reported",
+      severity: "medium",
+      condition: "After Dark",
+    },
+    {
+      name: "Hampi Cliff Areas",
+      image: "/dynamic-safety-hazard-theft.jpg",
+      reason: "Theft reports in isolated areas",
+      severity: "high",
+      condition: "Isolated Areas",
+    },
+    {
+      name: "Landslide Zone",
+      image: "/dynamic-safety-hazard-landslide.jpg",
+      reason: "Recent landslide activity",
+      severity: "high",
+      condition: "Monsoon Season",
+    },
+  ]
+
+  const SpotCard = ({ spot }: { spot: any }) => {
+    const safety = getSafetyScore(spot)
+    const photo = getPlacePhoto(spot)
+    
+    return (
+      <Card
+        className="placard-3d flex-shrink-0 w-52 rounded-3xl overflow-hidden shadow-md cursor-pointer bg-card border border-border"
+        onClick={() => router.push(`/hotel/${encodeURIComponent(spot.name)}`)}
+      >
+        <div className="relative">
+          <img src={photo} alt={spot.name} className="w-full h-32 object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute top-2 right-2">
+            <LikeButton
+              placeId={spot.place_id || spot.name.toLowerCase().replace(/\s+/g, "-")}
+              placeName={spot.name}
+              placeData={{
+                name: spot.name,
+                location: spot.vicinity || "Karnataka, India",
+                image: photo,
+                rating: spot.rating?.toString() || "N/A",
+                timing: spot.opening_hours?.open_now ? "Open Now" : "Check Hours",
+                entry: spot.price_level ? "₹" + (spot.price_level * 200) : "Free",
+                description: spot.types?.[0]?.replace(/_/g, ' ') || "Tourist Attraction",
+              }}
+              size="sm"
+              className="shadow-lg"
+            />
+          </div>
+          <div className="absolute top-2 left-2">
+            <div className="bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-md">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  safety.color === "text-green-500" ? "bg-green-500" : 
+                  safety.color === "text-yellow-500" ? "bg-yellow-500" : 
+                  safety.color === "text-orange-500" ? "bg-orange-500" : "bg-gray-500"
+                }`}
+              ></div>
+              <span className="text-xs font-medium text-gray-800">{safety.score}</span>
             </div>
           </div>
-
-          {/* Location Status and Controls */}
-          <div className="px-4 pb-4">
-            {/* ...location status, controls, and details JSX... */}
+          <div className="absolute bottom-2 left-2 right-2 text-white">
+            <div className="space-y-1">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-xs opacity-90">
+                    {spot.opening_hours?.open_now ? "Open Now" : "Check Hours"}
+                  </p>
+                  <p className="text-xs opacity-90">
+                    {spot.price_level ? "₹" + (spot.price_level * 200) : "Free"}
+                  </p>
+                  <p className={`text-xs font-medium ${safety.color}`}>
+                    Safety: {safety.level}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                  <span className="text-xs">{spot.rating?.toFixed(1) || "N/A"}</span>
+                </div>
+              </div>
+              <p className="text-xs opacity-75 italic">
+                {spot.types?.[0]?.replace(/_/g, ' ') || "Tourist Attraction"}
+              </p>
+            </div>
           </div>
-
-          {/* Search Bar */}
-          <div className="px-4 pb-4">
-            {/* ...search bar JSX... */}
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 px-4 pb-20">
-            {/* ...map, cards, and all main sections JSX... */}
-          </div>
-
-          <BottomNavigation />
         </div>
-      );
-    }
+        <div className="p-4">
+          <h3 className="text-sm font-semibold text-card-foreground text-center truncate">{spot.name}</h3>
+          <p className="text-xs text-muted-foreground text-center mt-1 truncate">{spot.vicinity}</p>
+        </div>
+      </Card>
+    )
+  }
+
+  const SafetyHazardCard = ({ hazard }: { hazard: any }) => (
+    <Card className="placard-3d flex-shrink-0 w-48 rounded-3xl overflow-hidden shadow-md bg-card border border-destructive/20">
+      <div className="relative">
+        <img src={hazard.image || "/placeholder.svg"} alt={hazard.name} className="w-full h-28 object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-red-900/80 via-red-900/20 to-transparent" />
+        <div className="absolute top-2 right-2">
+          <div
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              hazard.severity === "high" ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+            }`}
+          >
+            {hazard.condition}
+          </div>
+        </div>
+        <div className="absolute bottom-2 left-2 right-2 text-white">
+          <div className="flex items-center gap-1 mb-1">
+            <AlertCircle className={`h-3 w-3 ${hazard.severity === "high" ? "text-red-400" : "text-amber-400"}`} />
+            <span className="text-xs font-medium">{hazard.severity.toUpperCase()} RISK</span>
+          </div>
+        </div>
+      </div>
+      <div className="p-3">
+        <h3 className="text-sm font-medium text-card-foreground mb-1">{hazard.name}</h3>
+        <p className="text-xs text-muted-foreground">{hazard.reason}</p>
+      </div>
+    </Card>
+  )
 
   const handleCategoryClick = (category: any) => {
     if (category.href) {
@@ -534,11 +843,10 @@ export default function TouristSpotsPage() {
           <div className="flex items-center gap-3">
             {/* Location Status */}
             <div className="flex items-center gap-2">
-              <div className={
-                "w-3 h-3 rounded-full " +
-                (userLocation && !locationError ? 'bg-green-500 animate-pulse' : 
-                isLocationLoading ? 'bg-yellow-500 animate-pulse' : 'bg-red-500')
-              }></div>
+              <div className={`w-3 h-3 rounded-full ${
+                userLocation && !locationError ? 'bg-green-500 animate-pulse' : 
+                isLocationLoading ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'
+              }`}></div>
               <span className="text-sm text-muted-foreground">
                 {userLocation && !locationError ? 'Live Location Active' : 
                  isLocationLoading ? 'Getting Location...' : 'Location Unavailable'}
@@ -778,7 +1086,7 @@ export default function TouristSpotsPage() {
             <Card
               key={category.label}
               onClick={() => handleCategoryClick(category)}
-              className={"placard-3d relative p-4 h-28 flex flex-col items-center justify-center cursor-pointer text-white border-0 rounded-2xl shadow-lg bg-gradient-to-br " + category.color}
+              className={`placard-3d relative p-4 h-28 flex flex-col items-center justify-center cursor-pointer text-white border-0 rounded-2xl shadow-lg bg-gradient-to-br ${category.color}`}
             >
               <category.icon className="h-10 w-10 mb-2" />
               <span className="text-xs font-medium text-center leading-tight">{category.label}</span>
@@ -888,7 +1196,9 @@ export default function TouristSpotsPage() {
           </>
         )}
       </div>
+
       <BottomNavigation />
     </div>
-  );
+  )
 }
+
